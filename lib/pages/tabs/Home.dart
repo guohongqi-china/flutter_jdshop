@@ -1,6 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_jdshop/pages/model/ProductModel.dart';
 import 'package:flutter_swiper/flutter_swiper.dart';
 import '../services/ScreenAdapter.dart';
+import '../model/FocusModel.dart';
+import 'package:dio/dio.dart';
+import '../config/Config.dart';
 
 class HomePage extends StatefulWidget {
   @override
@@ -8,33 +12,81 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  Widget _swiper() {
-    List<Map> imgList = [
-      {'url': 'https://www.itying.com/images/flutter/slide01.jpg'},
-      {'url': 'https://www.itying.com/images/flutter/slide02.jpg'},
-      {'url': 'https://www.itying.com/images/flutter/slide03.jpg'},
-    ];
+  List<FocusItemModel> _focusData = [];
+  List<ProductItemModel> _hotProductList = [];
+  List<ProductItemModel> _bestProductList = [];
 
-    // 轮播图
+  @override
+  initState() {
+    super.initState();
+    _getFocusData();
+    _getHotProductData();
+    _getBestProductData();
+  }
+
+  //==============================Event Actions=============================================
+
+  // 获取轮播图数据
+  _getFocusData() async {
+    var api = Config.bannerApi;
+    var result = await Dio().get(api);
+    FocusModel focuslist = FocusModel.fromJson(result.data);
+    setState(() {
+      this._focusData = focuslist.result;
+    });
+  }
+
+  // 获取猜你喜欢数据
+  _getHotProductData() async {
+    var api = Config.productApi;
+    var result = await Dio().get(api);
+    ProductModel hotProductList = ProductModel.fromJson(result.data);
+
+    setState(() {
+      this._hotProductList = hotProductList.result;
+    });
+  }
+
+  // 获取热门推荐
+  _getBestProductData() async {
+    var api = Config.bestProductApi;
+    var result = await Dio().get(api);
+    ProductModel bestProductList = ProductModel.fromJson(result.data);
+    print('=================');
+    setState(() {
+      this._bestProductList = bestProductList.result;
+    });
+  }
+
+  //==============================Widget Actions=============================================
+
+  // 轮播图
+  Widget _swiper() {
     Widget swiper = Swiper(
       itemBuilder: (BuildContext context, int index) {
+        String pic = this._focusData[index].pic;
         return new Image.network(
-          imgList[index]["url"],
+          "${Config.domain}${pic.replaceAll('\\', '/')}",
           fit: BoxFit.fill,
         );
       },
       // indicatorLayout: PageIndicatorLayout.COLOR,
       autoplay: true,
-      itemCount: imgList.length,
+      itemCount: this._focusData.length,
       pagination: new SwiperPagination(),
       control: new SwiperControl(),
     );
-    return Container(
-      child: AspectRatio(
-        aspectRatio: 2 / 1,
-        child: swiper,
-      ),
-    );
+
+    if (this._focusData.length > 0) {
+      return Container(
+        child: AspectRatio(
+          aspectRatio: 2 / 1,
+          child: swiper,
+        ),
+      );
+    } else {
+      return Text('加载中....');
+    }
   }
 
   // 小组件
@@ -56,12 +108,15 @@ class _HomePageState extends State<HomePage> {
 
   //热门商品
   Widget _hotProductListWidget() {
-    return Container(
+    Widget _hotProductWidget = Container(
       height: ScreenAdapter.height(200),
       width: double.infinity,
       child: ListView.builder(
         scrollDirection: Axis.horizontal,
         itemBuilder: (contxt, index) {
+          String sPic = this._hotProductList[index].sPic;
+          sPic = Config.domain + sPic.replaceAll("\\", "/");
+
           return Column(
             children: [
               Container(
@@ -70,25 +125,34 @@ class _HomePageState extends State<HomePage> {
                   // width: ScreenAdapter.width(140),
                   child: AspectRatio(
                     aspectRatio: 4 / 5,
-                    child: Image.network(
-                        "https://www.itying.com/images/flutter/hot${index + 1}.jpg",
-                        fit: BoxFit.cover),
+                    child: Image.network(sPic, fit: BoxFit.cover),
                   )),
               Container(
                 // color: Colors.red,
                 height: ScreenAdapter.height(30),
-                child: Text("第${index}条"),
+                child: Text(
+                  "￥${this._hotProductList[index].price}",
+                  style: TextStyle(color: Colors.red),
+                ),
               )
             ],
           );
         },
-        itemCount: 10,
+        itemCount: this._hotProductList.length,
       ),
     );
+    if (this._hotProductList.length > 0) {
+      return _hotProductWidget;
+    } else {
+      return Text(' ');
+    }
   }
 
-  _recProductItemWidget() {
+  // 热门推荐列表
+  Widget _recProductItemWidget(ProductItemModel value) {
     var itemWidth = (ScreenAdapter.getScreenWidth() - 30) / 2;
+    String sImg = value.sPic;
+    sImg = Config.domain + sImg.replaceAll("\\", "/");
     return Container(
       padding: EdgeInsets.all(10),
       width: itemWidth,
@@ -98,13 +162,15 @@ class _HomePageState extends State<HomePage> {
         children: [
           Container(
               width: double.infinity,
-              child: Image.network(
-                  'https://www.itying.com/images/flutter/list1.jpg',
-                  fit: BoxFit.cover)),
+              child: AspectRatio(
+                // 防止服务器返回的图片大小不一致，导致高度不一致
+                aspectRatio: 1 / 1,
+                child: Image.network(sImg, fit: BoxFit.cover),
+              )),
           Padding(
             padding: EdgeInsets.only(top: ScreenAdapter.height(10)),
             child: Text(
-              "2019夏季四方达是的发送到发送到发送到发送到发生打发斯蒂芬",
+              value.title,
               maxLines: 2,
               overflow: TextOverflow.ellipsis,
               style: TextStyle(color: Colors.black54),
@@ -117,13 +183,13 @@ class _HomePageState extends State<HomePage> {
                 Align(
                   alignment: Alignment.topLeft,
                   child: Text(
-                    '￥ 188.00',
+                    '￥${value.price}',
                     style: TextStyle(color: Colors.red, fontSize: 16.0),
                   ),
                 ),
                 Align(
                   alignment: Alignment.topRight,
-                  child: Text('￥ 198.00',
+                  child: Text('￥${value.oldPrice}',
                       style: TextStyle(
                         color: Colors.black54,
                         fontSize: 14.0,
@@ -138,19 +204,16 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  Widget _wrapWidget() {
-    return Wrap(
-      runSpacing: 10,
-      spacing: 10,
-      children: [
-        _recProductItemWidget(),
-        _recProductItemWidget(),
-        _recProductItemWidget(),
-        _recProductItemWidget(),
-        _recProductItemWidget(),
-        _recProductItemWidget(),
-      ],
-    );
+  Widget _recProductListWidget() {
+    return Container(
+        padding: EdgeInsets.all(10),
+        child: Wrap(
+          runSpacing: 10,
+          spacing: 10,
+          children: this._bestProductList.map((value) {
+            return _recProductItemWidget(value);
+          }).toList(),
+        ));
   }
 
   @override
@@ -169,7 +232,7 @@ class _HomePageState extends State<HomePage> {
       ),
       _hotProductListWidget(),
       _titleWidget('热门推荐'),
-      Container(padding: EdgeInsets.all(10), child: _wrapWidget())
+      _recProductListWidget(),
     ];
 
     // body

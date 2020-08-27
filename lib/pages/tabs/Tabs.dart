@@ -12,7 +12,7 @@ class TabsPage extends StatefulWidget {
 }
 
 class _TabsPageState extends State<TabsPage> {
-  var currentIndex = 0;
+  var currentIndex = 1;
 
   final List<Widget> bodyList = [
     HomePage(),
