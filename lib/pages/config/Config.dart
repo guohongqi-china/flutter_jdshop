@@ -8,4 +8,10 @@ class Config {
   static String productApi = "${domain}api/plist?is_hot=1";
   // 热门推荐
   static String bestProductApi = "${domain}api/plist?is_best=1";
+
+  // 分类
+  static String cateProductApi = "${domain}api/pcate";
+
+  // 商品详情列表
+  static String productInfoApi = "${domain}api/plist";
 }

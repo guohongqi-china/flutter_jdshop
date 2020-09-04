@@ -27,7 +27,7 @@ class ProductItemModel {
   String cid;
   Object price;
   String oldPrice;
-  String pic;
+  Object pic;
   String sPic;
 
   ProductItemModel(

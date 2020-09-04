@@ -5,16 +5,22 @@ import '../services/ScreenAdapter.dart';
 import '../model/FocusModel.dart';
 import 'package:dio/dio.dart';
 import '../config/Config.dart';
+import '../Widget/AppBarHead.dart';
 
 class HomePage extends StatefulWidget {
   @override
   _HomePageState createState() => _HomePageState();
 }
 
-class _HomePageState extends State<HomePage> {
+class _HomePageState extends State<HomePage>
+    with AutomaticKeepAliveClientMixin {
   List<FocusItemModel> _focusData = [];
   List<ProductItemModel> _hotProductList = [];
   List<ProductItemModel> _bestProductList = [];
+
+  @override
+  // TODO: implement wantKeepAlive
+  bool get wantKeepAlive => true;
 
   @override
   initState() {
@@ -235,11 +241,54 @@ class _HomePageState extends State<HomePage> {
       _recProductListWidget(),
     ];
 
+    Widget headerSearch = InkWell(
+      onTap: () {
+        Navigator.pushNamed(context, '/search');
+      },
+      child: Container(
+        height: ScreenAdapter.height(50),
+        padding: EdgeInsets.fromLTRB(10, 0, 10, 0),
+        decoration: BoxDecoration(
+            color: Color.fromRGBO(233, 233, 233, 0.8),
+            borderRadius: BorderRadius.circular(ScreenAdapter.height(50) / 2)),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            Icon(
+              Icons.search,
+              color: Colors.grey,
+            ),
+            Text(
+              '笔记本',
+              style: TextStyle(fontSize: 16, color: Colors.black54),
+            )
+          ],
+        ),
+      ),
+    );
+
     // body
     Widget content = Scaffold(
       appBar: AppBar(
-        title: Text('首页'),
+        title: AppBarHeadPage(
+          title: '笔记本',
+          tapAction: () {
+            Navigator.pushNamed(context, '/search');
+          },
+        ),
         centerTitle: true,
+        leading:
+            IconButton(icon: Icon(Icons.center_focus_weak), onPressed: () {}),
+        actions: [
+          IconButton(
+              icon: Icon(
+                Icons.message,
+                color: Colors.white,
+              ),
+              iconSize: 28,
+              color: Colors.black87,
+              onPressed: () {}),
+        ],
       ),
       body: ListView(children: listWidget),
     );

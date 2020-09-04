@@ -14,6 +14,15 @@ class TabsPage extends StatefulWidget {
 class _TabsPageState extends State<TabsPage> {
   var currentIndex = 1;
 
+  var _pageController;
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    _pageController = PageController(initialPage: this.currentIndex);
+  }
+
   final List<Widget> bodyList = [
     HomePage(),
     Category(),
@@ -32,6 +41,7 @@ class _TabsPageState extends State<TabsPage> {
   _tapIndex(index) {
     setState(() {
       this.currentIndex = index;
+      this._pageController.jumpToPage(index);
     });
   }
 
@@ -45,8 +55,28 @@ class _TabsPageState extends State<TabsPage> {
       iconSize: 20.0, // 按钮图标大小尺寸调整
       currentIndex: currentIndex,
     );
+
+    // 保持页面状态
+    Widget body = IndexedStack(
+      index: this.currentIndex,
+      children: bodyList,
+    );
+
+    Widget pageView = PageView(
+      controller: this._pageController,
+      children: bodyList,
+      onPageChanged: (index) {
+        // 监听页面改动
+        setState(() {
+          this.currentIndex = index;
+        });
+        print('当前改变页面下标=====$index');
+      },
+      physics: NeverScrollableScrollPhysics(), //进制pageView滑动
+    );
+
     return Scaffold(
-      body: this.bodyList[this.currentIndex],
+      body: pageView,
       bottomNavigationBar: bottomNavBar,
     );
   }
