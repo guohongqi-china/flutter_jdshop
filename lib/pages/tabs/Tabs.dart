@@ -12,7 +12,7 @@ class TabsPage extends StatefulWidget {
 }
 
 class _TabsPageState extends State<TabsPage> {
-  var currentIndex = 1;
+  var currentIndex = 0;
 
   var _pageController;
 

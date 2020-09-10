@@ -13,6 +13,7 @@ class ProductListPage extends StatefulWidget {
 }
 
 class _ProductListPageState extends State<ProductListPage> {
+  var _focus = false;
   var _topIndex = 1;
   // 分页
   int _page = 1;
@@ -20,6 +21,8 @@ class _ProductListPageState extends State<ProductListPage> {
   int _pageSize = 8;
   // 是否有数据
   bool hasMore = true;
+  // 是否有搜索数据
+  bool _hasData = true;
   // 数据
   List _productListData = [];
   // 排序
@@ -31,6 +34,13 @@ class _ProductListPageState extends State<ProductListPage> {
 
   // 调用系统级别侧边栏
   final GlobalKey<ScaffoldState> _scaffoldKey = new GlobalKey<ScaffoldState>();
+
+  // 配置搜索框的值
+  var _initKeyWordsController = TextEditingController();
+
+  var _cid = "";
+
+  var _kewords = "";
 
   /** 
    * 二级导航数据 
@@ -49,8 +59,13 @@ class _ProductListPageState extends State<ProductListPage> {
   @override
   initState() {
     super.initState();
-    _getProductListData();
 
+    this._cid = widget.arguments['cid'];
+    this._kewords = widget.arguments['keywords'];
+    var ui = widget.arguments['keywords'];
+
+    print(
+        'object=========${this._kewords} ----- ${widget.arguments['keywords']} [${ui}]');
     _scrollController.addListener(() {
       //  position.pixels 滚动的高度
       //  position.maxScrollExtent  页面总高度
@@ -61,6 +76,11 @@ class _ProductListPageState extends State<ProductListPage> {
         }
       }
     });
+
+    // 给搜索框赋值
+    _initKeyWordsController.text =
+        widget.arguments['keywords'] == null ? "" : this._kewords;
+    _getProductListData();
   }
 
   // 获取商品列表数据
@@ -68,11 +88,31 @@ class _ProductListPageState extends State<ProductListPage> {
     setState(() {
       this.flag = false;
     });
-    var api =
-        "${Config.productInfoApi}?cid=${widget.arguments['cid']}&page=$_page&sort=${this._sort}&pageSize=${this._pageSize}";
+    var api;
+    if (this._kewords == null) {
+      api =
+          "${Config.productInfoApi}?cid=${this._cid}&page=$_page&sort=${this._sort}&pageSize=${this._pageSize}";
+    } else {
+      // api =
+      //     "${Config.productInfoApi}?search=${widget.arguments['keywords']}&page=$_page&sort=${this._sort}&pageSize=${this._pageSize}";
+      api =
+          "${Config.productInfoApi}?search=${this._kewords}&page=$_page&sort=${this._sort}&pageSize=${this._pageSize}";
+    }
+
     var result = await Dio().get(api);
     ProductModel productList = ProductModel.fromJson(result.data);
-    print(productList.result);
+
+    // 判断是否有搜索数据
+    if (productList.result.length == 0 && this._page == 1) {
+      setState(() {
+        this._hasData = false;
+      });
+    } else {
+      setState(() {
+        this._hasData = true;
+      });
+    }
+
     if (productList.result.length < this._pageSize) {
       setState(() {
         this._productListData.addAll(productList.result);
@@ -137,9 +177,6 @@ class _ProductListPageState extends State<ProductListPage> {
                       Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          SizedBox(
-                            height: 10,
-                          ),
                           Text(
                             model.title,
                             maxLines: 2,
@@ -274,6 +311,59 @@ class _ProductListPageState extends State<ProductListPage> {
 
   @override
   Widget build(BuildContext context) {
+    // 导航搜索按钮
+    Widget searchBtn = Container(
+      height: ScreenAdapter.height(68),
+      width: ScreenAdapter.width(80),
+      child: Row(
+        children: [
+          InkWell(
+            child: Text('搜索'),
+            onTap: () {
+              // 重置更多数据
+              this.hasMore = true;
+              // 重置分页
+              this._page = 1;
+              // 重置数据
+              this._productListData = [];
+
+              // listview滚动到顶部
+              _scrollController.animateTo(0.0,
+                  duration: Duration(seconds: 2), curve: Curves.bounceInOut);
+              // 重新请求数据
+              this._getProductListData();
+              // Navigator.pushReplacementNamed(context, '/productlist',
+              //     arguments: {"keywords": this._keywords});
+            },
+          )
+        ],
+      ),
+    );
+    // 导航搜索输入框
+    Widget headSearch = Container(
+      padding: EdgeInsets.only(bottom: ScreenAdapter.height(5)),
+      height: ScreenAdapter.height(50),
+      decoration: BoxDecoration(
+          color: Color.fromRGBO(233, 233, 233, 0.8),
+          borderRadius: BorderRadius.circular(ScreenAdapter.height(68) / 2)),
+      child: TextField(
+        textAlignVertical: TextAlignVertical.bottom,
+        autofocus: false,
+        controller: _initKeyWordsController,
+        decoration: InputDecoration(
+            hintText: '请输入搜索内容',
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(ScreenAdapter.height(68) / 2),
+              borderSide: BorderSide.none,
+            )),
+        onChanged: (value) {
+          setState(() {
+            // this._focus = true;
+            this._kewords = value;
+          });
+        },
+      ),
+    );
     ScreenAdapter.init(context);
     Widget drawer = Drawer(
       child: Text('data'),
@@ -287,15 +377,20 @@ class _ProductListPageState extends State<ProductListPage> {
       ],
     );
     Widget appBar = AppBar(
-      title: Text('商品列表'),
+      title: widget.arguments['cid'] != null ? Text('商品列表') : headSearch,
       centerTitle: true,
-      actions: [Text('')],
+
+      actions: [widget.arguments['cid'] != null ? Text('') : searchBtn],
       // leading: Text(''),
     );
     Widget content = Scaffold(
       key: _scaffoldKey,
       appBar: appBar,
-      body: body,
+      body: this._hasData
+          ? body
+          : Center(
+              child: Text('没有你要浏览的数据'),
+            ),
       endDrawer: drawer,
     );
     return content;

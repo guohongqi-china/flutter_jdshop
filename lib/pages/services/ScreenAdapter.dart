@@ -1,4 +1,6 @@
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:flutter/material.dart';
+import 'dart:ui' as ui show window;
 
 class ScreenAdapter {
   static init(context) {
@@ -28,5 +30,20 @@ class ScreenAdapter {
   /// 获取整屏宽度
   static getScreenWidth() {
     return ScreenUtil.screenWidth;
+  }
+
+  static double get navigationBarHeight {
+    MediaQueryData mediaQuery = MediaQueryData.fromWindow(ui.window);
+    return mediaQuery.padding.top + kToolbarHeight;
+  }
+
+  static double get topSafeHeight {
+    MediaQueryData mediaQuery = MediaQueryData.fromWindow(ui.window);
+    return mediaQuery.padding.top;
+  }
+
+  static double get bottomSafeHeight {
+    MediaQueryData mediaQuery = MediaQueryData.fromWindow(ui.window);
+    return mediaQuery.padding.bottom;
   }
 }

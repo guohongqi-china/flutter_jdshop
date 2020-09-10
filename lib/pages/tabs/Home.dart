@@ -6,6 +6,7 @@ import '../model/FocusModel.dart';
 import 'package:dio/dio.dart';
 import '../config/Config.dart';
 import '../Widget/AppBarHead.dart';
+import '../services/SearchServices.dart';
 
 class HomePage extends StatefulWidget {
   @override
@@ -28,6 +29,7 @@ class _HomePageState extends State<HomePage>
     _getFocusData();
     _getHotProductData();
     _getBestProductData();
+    SearchServices.setHistoryList('333');
   }
 
   //==============================Event Actions=============================================
@@ -159,53 +161,59 @@ class _HomePageState extends State<HomePage>
     var itemWidth = (ScreenAdapter.getScreenWidth() - 30) / 2;
     String sImg = value.sPic;
     sImg = Config.domain + sImg.replaceAll("\\", "/");
-    return Container(
-      padding: EdgeInsets.all(10),
-      width: itemWidth,
-      decoration:
-          BoxDecoration(border: Border.all(color: Colors.black12, width: 1.0)),
-      child: Column(
-        children: [
-          Container(
-              width: double.infinity,
-              child: AspectRatio(
-                // 防止服务器返回的图片大小不一致，导致高度不一致
-                aspectRatio: 1 / 1,
-                child: Image.network(sImg, fit: BoxFit.cover),
-              )),
-          Padding(
-            padding: EdgeInsets.only(top: ScreenAdapter.height(10)),
-            child: Text(
-              value.title,
-              maxLines: 2,
-              overflow: TextOverflow.ellipsis,
-              style: TextStyle(color: Colors.black54),
+    return InkWell(
+      onTap: () {
+        Navigator.pushNamed(context, '/productcontent',
+            arguments: {'id': value.sId});
+      },
+      child: Container(
+        padding: EdgeInsets.all(10),
+        width: itemWidth,
+        decoration: BoxDecoration(
+            border: Border.all(color: Colors.black12, width: 1.0)),
+        child: Column(
+          children: [
+            Container(
+                width: double.infinity,
+                child: AspectRatio(
+                  // 防止服务器返回的图片大小不一致，导致高度不一致
+                  aspectRatio: 1 / 1,
+                  child: Image.network(sImg, fit: BoxFit.cover),
+                )),
+            Padding(
+              padding: EdgeInsets.only(top: ScreenAdapter.height(10)),
+              child: Text(
+                value.title,
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+                style: TextStyle(color: Colors.black54),
+              ),
             ),
-          ),
-          Padding(
-            padding: EdgeInsets.only(top: 10),
-            child: Stack(
-              children: [
-                Align(
-                  alignment: Alignment.topLeft,
-                  child: Text(
-                    '￥${value.price}',
-                    style: TextStyle(color: Colors.red, fontSize: 16.0),
+            Padding(
+              padding: EdgeInsets.only(top: 10),
+              child: Stack(
+                children: [
+                  Align(
+                    alignment: Alignment.topLeft,
+                    child: Text(
+                      '￥${value.price}',
+                      style: TextStyle(color: Colors.red, fontSize: 16.0),
+                    ),
                   ),
-                ),
-                Align(
-                  alignment: Alignment.topRight,
-                  child: Text('￥${value.oldPrice}',
-                      style: TextStyle(
-                        color: Colors.black54,
-                        fontSize: 14.0,
-                        decoration: TextDecoration.lineThrough,
-                      )),
-                )
-              ],
+                  Align(
+                    alignment: Alignment.topRight,
+                    child: Text('￥${value.oldPrice}',
+                        style: TextStyle(
+                          color: Colors.black54,
+                          fontSize: 14.0,
+                          decoration: TextDecoration.lineThrough,
+                        )),
+                  )
+                ],
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
