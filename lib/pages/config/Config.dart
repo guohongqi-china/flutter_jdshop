@@ -14,4 +14,10 @@ class Config {
 
   // 商品详情列表
   static String productInfoApi = "${domain}api/plist";
+
+  // 商品详情列表
+  static String productcontentApi = "${domain}api/pcontent?id=";
+
+  // 商品详情列表
+  static String productwebApi = "${domain}pcontent?id=";
 }

@@ -4,6 +4,10 @@ import 'ProductContentSecond.dart';
 import 'ProductContentThree.dart';
 import '../services/ScreenAdapter.dart';
 import '../Widget/CustomizeButton.dart';
+import 'package:dio/dio.dart';
+import '../config/Config.dart';
+import '../model/ProductContent.dart';
+import '../Widget/LoadingWidget.dart';
 
 class ProductContentPage extends StatefulWidget {
   final Map arguments;
@@ -13,10 +17,28 @@ class ProductContentPage extends StatefulWidget {
 }
 
 class _ProductContentPageState extends State<ProductContentPage> {
+  //
+  ProductContentItem _productContentData;
+  List<ProductContentItem> _productContentList = [];
+
   @override
   initState() {
     super.initState();
+    _getContentData();
   }
+  // ===============================data==================================
+
+  _getContentData() async {
+    var api = Config.productcontentApi + "${widget.arguments['id']}";
+    print('$api');
+    var result = await Dio().get(api);
+    var productList = ProductContentModel.fromJson(result.data);
+    setState(() {
+      this._productContentList.add(productList.result);
+    });
+  }
+
+  // ===============================Actions==================================
 
   // 导航右侧按钮事件
   _menuTapAction() {
@@ -74,6 +96,7 @@ class _ProductContentPageState extends State<ProductContentPage> {
     ScreenAdapter.init(context);
     // 底部 悬浮
     Widget bottomToast = Container(
+      padding: EdgeInsets.only(bottom: ScreenAdapter.bottomSafeHeight),
       child: _bottomSelect(),
       decoration: BoxDecoration(
           color: Colors.white,
@@ -99,18 +122,23 @@ class _ProductContentPageState extends State<ProductContentPage> {
             ),
           ]),
     );
+    //loading
+    Widget loading = LoadingWidget();
     // 底部内容
     Widget tabbarview = Stack(
       children: [
-        TabBarView(children: <Widget>[
-          ProductContentFirstPage(),
-          ProductContentSecondPage(),
-          ProductContentThreePage(),
-        ]),
+        TabBarView(physics: NeverScrollableScrollPhysics(), //禁止滑动
+            children: <Widget>[
+              ProductContentFirstPage(this._productContentList),
+              ProductContentSecondPage(
+                productContentList: this._productContentList,
+              ),
+              ProductContentThreePage(),
+            ]),
         Positioned(
             width: ScreenAdapter.width(750),
-            height: ScreenAdapter.height(80),
-            bottom: ScreenAdapter.bottomSafeHeight,
+            height: ScreenAdapter.height(80) + ScreenAdapter.bottomSafeHeight,
+            bottom: 0,
             child: bottomToast)
       ],
     );
@@ -118,12 +146,13 @@ class _ProductContentPageState extends State<ProductContentPage> {
     Widget scaffold = Scaffold(
       appBar: AppBar(
         title: tabbar,
+        centerTitle: true,
         actions: [
           IconButton(
               icon: Icon(Icons.more_horiz), onPressed: () => _menuTapAction())
         ],
       ),
-      body: tabbarview,
+      body: this._productContentList.length > 0 ? tabbarview : loading,
     );
     // 内容
     Widget content = DefaultTabController(length: 3, child: scaffold);
