@@ -4,12 +4,14 @@ import '../tabs/Tabs.dart';
 import '../pageDart/ProductList.dart';
 import '../pageDart/Search.dart';
 import '../pageDart/ProductContent.dart';
+import '../tabs/Cart.dart';
 
 final routes = {
   '/': (context) => TabsPage(),
   '/productlist': (context, {arguments}) =>
       ProductListPage(arguments: arguments),
   '/search': (context) => SearchPage(),
+  '/cart': (context, {arguments}) => CartPage(arguments: arguments),
   '/productcontent': (context, {arguments}) => ProductContentPage(
         arguments: arguments,
       )

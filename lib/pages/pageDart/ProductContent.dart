@@ -8,6 +8,9 @@ import 'package:dio/dio.dart';
 import '../config/Config.dart';
 import '../model/ProductContent.dart';
 import '../Widget/LoadingWidget.dart';
+import '../services/EventBus.dart';
+import '../provider/Cart.dart';
+import 'package:provider/provider.dart';
 
 class ProductContentPage extends StatefulWidget {
   final Map arguments;
@@ -30,7 +33,6 @@ class _ProductContentPageState extends State<ProductContentPage> {
 
   _getContentData() async {
     var api = Config.productcontentApi + "${widget.arguments['id']}";
-    print('$api');
     var result = await Dio().get(api);
     var productList = ProductContentModel.fromJson(result.data);
     setState(() {
@@ -53,19 +55,25 @@ class _ProductContentPageState extends State<ProductContentPage> {
       children: [
         Container(
             width: ScreenAdapter.width(200),
-            child: Container(
-              margin: EdgeInsets.fromLTRB(0, 5, 0, 5),
-              child: Column(
-                children: [
-                  Icon(
-                    Icons.shopping_cart,
-                    size: 20,
-                  ),
-                  Text(
-                    '购物车',
-                    style: TextStyle(fontSize: 10),
-                  )
-                ],
+            child: InkWell(
+              onTap: () {
+                Navigator.pushNamed(context, '/cart',
+                    arguments: {'isTrue': true});
+              },
+              child: Container(
+                margin: EdgeInsets.fromLTRB(0, 5, 0, 5),
+                child: Column(
+                  children: [
+                    Icon(
+                      Icons.shopping_cart,
+                      size: 20,
+                    ),
+                    Text(
+                      '购物车',
+                      style: TextStyle(fontSize: 10),
+                    )
+                  ],
+                ),
               ),
             )),
         Expanded(
@@ -74,7 +82,9 @@ class _ProductContentPageState extends State<ProductContentPage> {
               bgColor: Colors.red,
               text: "加入购物车",
               callback: () {
-                print('====');
+                // 广播
+                // eventBus.fire(ProductContentEvent('加入购物车'));
+                eventBus.fire(ProductContentEvent("myUser"));
               },
             )),
         Expanded(

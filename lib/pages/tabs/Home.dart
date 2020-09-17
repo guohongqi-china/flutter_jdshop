@@ -60,7 +60,6 @@ class _HomePageState extends State<HomePage>
     var api = Config.bestProductApi;
     var result = await Dio().get(api);
     ProductModel bestProductList = ProductModel.fromJson(result.data);
-    print('=================');
     setState(() {
       this._bestProductList = bestProductList.result;
     });

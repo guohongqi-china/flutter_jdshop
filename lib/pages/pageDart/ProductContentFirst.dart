@@ -1,10 +1,15 @@
-import 'dart:collection';
-
+import 'dart:async';
+import '../services/CartServices.dart';
 import 'package:flutter/material.dart';
 import '../services/ScreenAdapter.dart';
 import '../Widget/CustomizeButton.dart';
 import '../model/ProductContent.dart';
 import '../config/Config.dart';
+import '../services/EventBus.dart';
+import './cart/CartNum.dart';
+import '../provider/Cart.dart';
+import 'package:provider/provider.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 
 class ProductContentFirstPage extends StatefulWidget {
   final List<ProductContentItem> _productContentList;
@@ -24,6 +29,10 @@ class _ProductContentFirstPageState extends State<ProductContentFirstPage>
 
   ProductContentItem _productContent;
   String selectValue;
+  // ignore: cancel_subscriptions
+  StreamSubscription actionEventBus;
+
+  var _cartProvider;
 
   List _attr = [];
   @override
@@ -33,6 +42,16 @@ class _ProductContentFirstPageState extends State<ProductContentFirstPage>
     this._attr = this._productContent.attr;
     _initAttr();
     _getSelectedAttrValue();
+    actionEventBus = eventBus.on<ProductContentEvent>().listen((event) {
+      _attrBottomSheet();
+    });
+  }
+
+  // 销毁
+  void dispose() {
+    super.dispose();
+    print('object=====已经销毁');
+    actionEventBus.cancel();
   }
 
   _initAttr() {
@@ -68,7 +87,6 @@ class _ProductContentFirstPageState extends State<ProductContentFirstPage>
 
   // 获取选中规格
   _getSelectedAttrValue() {
-    print('22222222222');
     var _list = this._attr;
     List tempArr = [];
     for (var i = 0; i < _list.length; i++) {
@@ -78,11 +96,11 @@ class _ProductContentFirstPageState extends State<ProductContentFirstPage>
         }
       }
     }
-    print('3333333333333');
 
     setState(() {
       this.selectValue = tempArr.join(',');
     });
+    this._productContent.selectedAttr = this.selectValue;
   }
 
   //============================================widget============================================
@@ -143,7 +161,32 @@ class _ProductContentFirstPageState extends State<ProductContentFirstPage>
                           Column(
                               children: this._attr.map((e) {
                             return _standardsWidget(e, setBottomState);
-                          }).toList())
+                          }).toList()),
+                          Divider(),
+                          Container(
+                              margin: EdgeInsets.only(top: 10),
+                              height: ScreenAdapter.height(80),
+                              child: Row(
+                                children: [
+                                  Text(
+                                    '数量: ',
+                                    style:
+                                        TextStyle(fontWeight: FontWeight.bold),
+                                  ),
+                                  SizedBox(
+                                    width: 4,
+                                  ),
+                                  CartNum(
+                                    productContent: this._productContent.count,
+                                    callBack: (value) {
+                                      // print('object +++++++++ $value');
+                                      setBottomState(() {
+                                        this._productContent.count = value;
+                                      });
+                                    },
+                                  )
+                                ],
+                              ))
                         ],
                       ),
                       Positioned(
@@ -155,7 +198,25 @@ class _ProductContentFirstPageState extends State<ProductContentFirstPage>
                               Expanded(
                                 flex: 1,
                                 child: CustomizeButton(
-                                  callback: null,
+                                  callback: () async {
+                                    CartServices.addCart(this._productContent)
+                                        .then((value) {
+                                          // 调用privaer 更新数据
+                                          return this
+                                              ._cartProvider
+                                              .updateCartList();
+                                        })
+                                        .then((value) =>
+                                            Navigator.of(context).pop())
+                                        .then((value) => Fluttertoast.showToast(
+                                            msg: "加入购物车成功",
+                                            toastLength: Toast.LENGTH_SHORT,
+                                            gravity: ToastGravity.BOTTOM,
+                                            timeInSecForIosWeb: 1,
+                                            backgroundColor: Colors.black54,
+                                            textColor: Colors.white,
+                                            fontSize: 16.0));
+                                  },
                                   bgColor: Colors.red,
                                   text: '加入购物车',
                                 ),
@@ -178,6 +239,8 @@ class _ProductContentFirstPageState extends State<ProductContentFirstPage>
 
   @override
   Widget build(BuildContext context) {
+    this._cartProvider = Provider.of<Cart>(context);
+
     String pic = this._productContent.pic;
     pic = pic.replaceAll('\\', '/');
     pic = Config.domain + pic;
@@ -275,7 +338,11 @@ class _ProductContentFirstPageState extends State<ProductContentFirstPage>
               ],
             ),
           ),
-          Divider()
+          Divider(),
+          Container(
+            height: 100.0,
+            color: Colors.white,
+          ),
         ],
       ),
     );

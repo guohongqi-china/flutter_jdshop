@@ -1,9 +1,21 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_jdshop/pages/routes/Route.dart';
-import 'package:flutter_jdshop/pages/tabs/Tabs.dart';
+
+// 进入provider
+import 'package:provider/provider.dart';
+import './pages/provider/Counter.dart';
+import './pages/provider/Cart.dart';
 
 void main() {
-  runApp(MyApp());
+  WidgetsFlutterBinding.ensureInitialized();
+  Provider.debugCheckInvalidValueType = null;
+  runApp(MultiProvider(
+    providers: [
+      ChangeNotifierProvider(create: (_) => Counter()),
+      ChangeNotifierProvider(create: (_) => Cart()),
+    ],
+    child: MyApp(),
+  ));
 }
 
 class MyApp extends StatefulWidget {
@@ -14,6 +26,8 @@ class MyApp extends StatefulWidget {
 class _MyAppState extends State<MyApp> {
   @override
   Widget build(BuildContext context) {
+    print('33333333333');
+
     return MaterialApp(
       debugShowCheckedModeBanner: true,
       theme: ThemeData(primaryColor: Colors.pink),
