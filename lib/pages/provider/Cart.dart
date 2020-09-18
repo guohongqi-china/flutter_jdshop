@@ -83,6 +83,7 @@ class Cart with ChangeNotifier {
       }
     }
     this._cartList = tempList;
+    computeAllPrice();
     Storage.setString('cartList', json.encode(this._cartList));
     notifyListeners();
   }

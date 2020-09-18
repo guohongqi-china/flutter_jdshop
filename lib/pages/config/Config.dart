@@ -20,4 +20,10 @@ class Config {
 
   // 商品详情列表
   static String productwebApi = "${domain}pcontent?id=";
+
+  // 发送验证码
+  static String sendCodeApi = "${domain}api/sendCode";
+
+  // 验证验证码
+  static String validateCodeAPi = "${domain}api/validateCode";
 }

@@ -5,12 +5,21 @@ import '../pageDart/ProductList.dart';
 import '../pageDart/Search.dart';
 import '../pageDart/ProductContent.dart';
 import '../tabs/Cart.dart';
+import '../pageDart/Login.dart';
+import '../pageDart/RegisterFirst.dart';
+import '../pageDart/RegisterSecond.dart';
+import '../pageDart/RegisterThird.dart';
 
 final routes = {
   '/': (context) => TabsPage(),
   '/productlist': (context, {arguments}) =>
       ProductListPage(arguments: arguments),
   '/search': (context) => SearchPage(),
+  '/login': (context) => LoginPage(),
+  '/registerFirst': (context) => RegisterFirst(),
+  '/registerSecond': (context, {arguments}) =>
+      RegisterSecond(arguments: arguments),
+  '/registerThird': (context) => RegisterThird(),
   '/cart': (context, {arguments}) => CartPage(arguments: arguments),
   '/productcontent': (context, {arguments}) => ProductContentPage(
         arguments: arguments,
