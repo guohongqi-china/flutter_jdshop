@@ -12,11 +12,12 @@ class RegisterFirst extends StatefulWidget {
 }
 
 class _RegisterFirstState extends State<RegisterFirst> {
-  String tel;
+  String tel = "";
 
   _sendCode() async {
     RegExp reg = RegExp(r"^1\d{10}$");
     bool result = reg.hasMatch(this.tel);
+    print('结果$result');
     if (!result) {
       _toastText("手机号输入有误");
     } else {

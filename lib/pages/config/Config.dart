@@ -26,4 +26,7 @@ class Config {
 
   // 验证验证码
   static String validateCodeAPi = "${domain}api/validateCode";
+
+  // 完成注册
+  static String doneRegisterApi = "${domain}api/register";
 }

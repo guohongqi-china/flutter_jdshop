@@ -1,14 +1,56 @@
 import 'package:flutter/material.dart';
 import '../services/ScreenAdapter.dart';
-import '../Widget/jdText.dart';
 import '../Widget/CustomizeButton.dart';
+import '../config/Config.dart';
+import 'package:dio/dio.dart';
+import 'package:fluttertoast/fluttertoast.dart';
+import '../services/Storage.dart';
+import 'dart:convert';
+import '../tabs/Tabs.dart';
 
 class RegisterThird extends StatefulWidget {
+  Map arguments;
+  RegisterThird({Key key, this.arguments}) : super(key: key);
   @override
   _RegisterThirdState createState() => _RegisterThirdState();
 }
 
 class _RegisterThirdState extends State<RegisterThird> {
+  String password = "";
+
+  _doneCodeRegister() async {
+    if (this.password.length < 6) {
+      _toastText('密码长度小于6位');
+      return;
+    }
+    var result = await Dio().post(Config.doneRegisterApi, data: {
+      'tel': widget.arguments['tel'],
+      'code': widget.arguments["code"],
+      'password': this.password
+    });
+
+    if (result.data['success']) {
+      // 保存用户信息 返回到根
+      await Storage.setString('userInfo', json.encode(result.data['userinfo']));
+      Navigator.of(context).pushAndRemoveUntil(
+          new MaterialPageRoute(builder: (context) => new TabsPage()),
+          (route) => route == null);
+    } else {
+      _toastText("出现错误");
+    }
+  }
+
+  _toastText(content) {
+    Fluttertoast.showToast(
+        msg: content,
+        toastLength: Toast.LENGTH_SHORT,
+        gravity: ToastGravity.BOTTOM,
+        timeInSecForIosWeb: 1,
+        backgroundColor: Colors.black54,
+        textColor: Colors.white,
+        fontSize: 16.0);
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -32,6 +74,9 @@ class _RegisterThirdState extends State<RegisterThird> {
               height: ScreenAdapter.height(80),
               child: TextField(
                 textAlignVertical: TextAlignVertical.bottom,
+                onChanged: (value) {
+                  this.password = value;
+                },
                 decoration: InputDecoration(
                     hintText: "请设置6-20位字符",
                     border: OutlineInputBorder(
@@ -81,9 +126,7 @@ class _RegisterThirdState extends State<RegisterThird> {
             Container(
               height: ScreenAdapter.height(80),
               child: CustomizeButton(
-                callback: () {
-                  Navigator.pushNamed(context, '/registerThird');
-                },
+                callback: _doneCodeRegister,
                 text: "完成",
                 bgColor: Colors.red,
                 margin: EdgeInsets.all(0),

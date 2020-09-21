@@ -3,6 +3,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:provider/provider.dart';
 import '../provider/Counter.dart';
 import '../services/ScreenAdapter.dart';
+import '../services/UserService.dart';
 
 class UserPage extends StatefulWidget {
   @override
@@ -10,23 +11,21 @@ class UserPage extends StatefulWidget {
 }
 
 class _UserPageState extends State<UserPage> {
-  _loacalStoray() async {
-    // final SharedPreferences prefs = await _prefs;
+  bool isLogin = false;
+  List userInfo = [];
 
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    prefs.setStringList('666', ['1111']);
-
-    print('====00000=+++++');
-
-    List result = prefs.getStringList('666');
-    print('======本地取值结果$result');
+  initState() {
+    super.initState();
+    _getUserInfo();
   }
 
-  _getLocalData() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-
-    String result = prefs.getString('key222');
-    print('======本地取值结果$result');
+  _getUserInfo() async {
+    var isLogin = await UserServices.getLoginState();
+    var userInfo = await UserServices.getUserInfo();
+    setState(() {
+      this.userInfo = userInfo;
+      this.isLogin = isLogin;
+    });
   }
 
   // ==================================  widget  =================================================
@@ -52,37 +51,36 @@ class _UserPageState extends State<UserPage> {
                 ),
               ),
             ),
-            Expanded(
-                flex: 1,
-                child: InkWell(
-                  onTap: () {
-                    Navigator.pushNamed(context, '/login');
-                  },
-                  child: Text(
-                    '登录/注册',
-                    style: TextStyle(color: Colors.white),
-                  ),
-                )),
-            // Expanded(
-            //     flex: 1,
-            //     child: Column(
-            //       mainAxisAlignment: MainAxisAlignment.center,
-            //       crossAxisAlignment: CrossAxisAlignment.start,
-            //       children: [
-            //         Text(
-            //           '用户名：22222222',
-            //           style: TextStyle(
-            //               color: Colors.white,
-            //               fontSize: ScreenAdapter.fontSize(32)),
-            //         ),
-            //         Text('普通会员',
-            //             style: TextStyle(
-            //                 color: Colors.white,
-            //                 fontSize: ScreenAdapter.fontSize(24))
-            //         )
-            //       ],
-            //     )
-            //   )
+            !this.isLogin
+                ? Expanded(
+                    flex: 1,
+                    child: InkWell(
+                      onTap: () {
+                        Navigator.pushNamed(context, '/login');
+                      },
+                      child: Text(
+                        '登录/注册',
+                        style: TextStyle(color: Colors.white),
+                      ),
+                    ))
+                : Expanded(
+                    flex: 1,
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          '用户名：${this.userInfo[0]['username']}',
+                          style: TextStyle(
+                              color: Colors.white,
+                              fontSize: ScreenAdapter.fontSize(32)),
+                        ),
+                        Text('普通会员',
+                            style: TextStyle(
+                                color: Colors.white,
+                                fontSize: ScreenAdapter.fontSize(24)))
+                      ],
+                    ))
           ],
         ),
       ),

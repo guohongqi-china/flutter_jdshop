@@ -6,7 +6,6 @@ import 'dart:async';
 import 'package:fluttertoast/fluttertoast.dart';
 import '../config/Config.dart';
 import 'package:dio/dio.dart';
-import '../config/Config.dart';
 
 class RegisterSecond extends StatefulWidget {
   Map arguments;
@@ -90,7 +89,8 @@ class _RegisterSecondState extends State<RegisterSecond> {
     var result = await Dio().post(Config.validateCodeAPi,
         data: {"tel": this._tel, "code": this._code});
     if (result.data["success"]) {
-      Navigator.pushNamed(context, '/registerThird');
+      Navigator.pushNamed(context, '/registerThird',
+          arguments: {"tel": this._tel, "code": this._code});
     } else {
       _toastText(result.data["message"]);
     }
