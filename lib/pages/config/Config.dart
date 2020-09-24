@@ -29,4 +29,31 @@ class Config {
 
   // 完成注册
   static String doneRegisterApi = "${domain}api/register";
+
+  // 登录
+  static String loginApi = "${domain}api/doLogin";
+
+  // 新增用户地址
+  static String addCartApi = "${domain}api/addAddress";
+
+  // 新增用户地址
+  static String editCartApi = "${domain}api/editAddress";
+
+  // 获取用户列表
+  static String addAddressList = "${domain}api/addressList";
+
+  // 获取用户默认地址
+  static String getDefaultAddress = "${domain}api/oneAddressList";
+
+  // 修改用户默认地址
+  static String changeDefaultAddress = "${domain}api/changeDefaultAddress";
+
+  // 刪除地址
+  static String deleteAddress = "${domain}api/deleteAddress";
+
+  // 下单
+  static String confirmOrder = "${domain}api/doOrder";
+
+  // 订单列表
+  static String orderList = "${domain}api/orderList";
 }

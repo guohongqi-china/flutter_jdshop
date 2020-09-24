@@ -5,6 +5,7 @@ import 'package:flutter_jdshop/pages/routes/Route.dart';
 import 'package:provider/provider.dart';
 import './pages/provider/Counter.dart';
 import './pages/provider/Cart.dart';
+import './pages/provider/CheckOut.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
@@ -13,6 +14,7 @@ void main() {
     providers: [
       ChangeNotifierProvider(create: (_) => Counter()),
       ChangeNotifierProvider(create: (_) => Cart()),
+      ChangeNotifierProvider(create: (_) => CheckOut()),
     ],
     child: MyApp(),
   ));

@@ -7,6 +7,9 @@ import '../pageDart/cart/CartItem.dart';
 // import '../pageDart/cart/CartNum.dart';
 import '../provider/Cart.dart';
 import '../services/ScreenAdapter.dart';
+import '../provider/CheckOut.dart';
+import 'package:fluttertoast/fluttertoast.dart';
+import '../services/UserService.dart';
 
 class CartPage extends StatefulWidget {
   Map arguments;
@@ -17,11 +20,43 @@ class CartPage extends StatefulWidget {
 
 class _CartPageState extends State<CartPage> {
   bool _isEdit = false;
-
+  var _checkOutProvider;
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
+  }
+
+  _doCheckOut() async {
+    // 1、获取购物车选中的数据
+    List checkList = await CartServices.getCheckOutData();
+    // 2、保存购物车选中的数据
+    this._checkOutProvider.changeCheckOutListData(checkList);
+    // 3、购物车有没有选中的数据
+    if (checkList.length > 0) {
+      // 4、判断用户有没有登录
+      bool loginState = await UserServices.getLoginState();
+      if (loginState) {
+        Navigator.pushNamed(context, '/checkOut');
+      } else {
+        _toastText('您还没有登录，请登录以后再去结算');
+        Navigator.pushNamed(context, '/login');
+      }
+    } else {
+      _toastText('没有勾选数据');
+    }
+    // 判断用户有没有登录， 保存购物车选中的数据
+  }
+
+  _toastText(content) {
+    Fluttertoast.showToast(
+        msg: content,
+        toastLength: Toast.LENGTH_SHORT,
+        gravity: ToastGravity.BOTTOM,
+        timeInSecForIosWeb: 1,
+        backgroundColor: Colors.black54,
+        textColor: Colors.white,
+        fontSize: 16.0);
   }
 
   Widget _bottomRightWidget(cartProvider) {
@@ -40,7 +75,9 @@ class _CartPageState extends State<CartPage> {
       onTap: () {
         if (this._isEdit) {
           cartProvider.deleteAllData();
-        } else {}
+        } else {
+          _doCheckOut();
+        }
       },
       child: Container(
         height: double.infinity,
@@ -57,6 +94,7 @@ class _CartPageState extends State<CartPage> {
   Widget build(BuildContext context) {
     ScreenAdapter.init(context);
     var cartProvider = Provider.of<Cart>(context);
+    _checkOutProvider = Provider.of<CheckOut>(context);
 
     print("object0000000000${widget.arguments}");
     var bottomH = widget.arguments == null

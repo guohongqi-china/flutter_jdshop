@@ -79,4 +79,40 @@ class CartServices {
     List data = json.decode(codeData == null ? "[]" : codeData);
     return data;
   }
+
+  // 获取购物车选中的数据
+  static getCheckOutData() async {
+    List temCheckOutData = [];
+    String codeData = await Storage.getString("cartList");
+    List cartListData = json.decode(codeData == null ? "[]" : codeData);
+    for (var item in cartListData) {
+      if (item['checked'] == true) {
+        temCheckOutData.add(item);
+      }
+    }
+    return temCheckOutData;
+  }
+
+  // 获取选中数据金额
+  static comptureTotalPrice() async {
+    List temp = await CartServices.getCheckOutData();
+    double totalPrice = 0;
+    for (var item in temp) {
+      totalPrice += item['price'];
+    }
+    return totalPrice.toStringAsFixed(1);
+  }
+
+  // 删除购物车选中的数据
+  static delectSelectCartData() async {
+    List temCheckOutData = [];
+    String codeData = await Storage.getString("cartList");
+    List cartListData = json.decode(codeData == null ? "[]" : codeData);
+    for (var item in cartListData) {
+      if (item['checked'] == false) {
+        temCheckOutData.add(item);
+      }
+    }
+    await Storage.setString('cartList', json.encode(temCheckOutData));
+  }
 }

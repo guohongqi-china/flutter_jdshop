@@ -9,6 +9,13 @@ import '../pageDart/Login.dart';
 import '../pageDart/RegisterFirst.dart';
 import '../pageDart/RegisterSecond.dart';
 import '../pageDart/RegisterThird.dart';
+import '../pageDart/CheckOut.dart';
+import '../pageDart/AddressAdd.dart';
+import '../pageDart/AddressList.dart';
+import '../pageDart/AddressEdit.dart';
+import '../pageDart/Pay.dart';
+import '../pageDart/Order.dart';
+import '../pageDart/OrderInfo.dart';
 
 final routes = {
   '/': (context) => TabsPage(),
@@ -24,7 +31,15 @@ final routes = {
   '/cart': (context, {arguments}) => CartPage(arguments: arguments),
   '/productcontent': (context, {arguments}) => ProductContentPage(
         arguments: arguments,
-      )
+      ),
+  '/checkOut': (context) => CheckOutPage(),
+  '/addressList': (context) => AddressListPage(),
+  '/addressAdd': (context) => AddressAddPage(),
+  '/order': (context) => OrderPage(),
+  '/orderInfo': (context) => OrderInfoPage(),
+  '/addressEdit': (context, {arguments}) =>
+      AddressEditPage(arguments: arguments),
+  '/pay': (context) => PayPage(),
 };
 
 //固定写法

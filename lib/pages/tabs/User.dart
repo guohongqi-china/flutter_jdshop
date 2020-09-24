@@ -1,9 +1,12 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:provider/provider.dart';
 import '../provider/Counter.dart';
 import '../services/ScreenAdapter.dart';
 import '../services/UserService.dart';
+import '../Widget/CustomizeButton.dart';
+import '../services/EventBus.dart';
 
 class UserPage extends StatefulWidget {
   @override
@@ -14,9 +17,17 @@ class _UserPageState extends State<UserPage> {
   bool isLogin = false;
   List userInfo = [];
 
+  StreamSubscription actionEventBus;
+
   initState() {
     super.initState();
     _getUserInfo();
+
+    // 监听广播事件
+    this.actionEventBus = eventBus.on<UserEvent>().listen((event) {
+      print(event.str);
+      _getUserInfo();
+    });
   }
 
   _getUserInfo() async {
@@ -26,6 +37,11 @@ class _UserPageState extends State<UserPage> {
       this.userInfo = userInfo;
       this.isLogin = isLogin;
     });
+  }
+
+  dispose() {
+    super.dispose();
+    actionEventBus.cancel();
   }
 
   // ==================================  widget  =================================================
@@ -87,6 +103,9 @@ class _UserPageState extends State<UserPage> {
       ListTile(
         leading: Icon(Icons.assignment, color: Colors.red),
         title: Text("全部订单"),
+        onTap: () {
+          Navigator.pushNamed(context, '/order');
+        },
       ),
       Divider(),
       ListTile(
@@ -112,6 +131,19 @@ class _UserPageState extends State<UserPage> {
         title: Text("在线客服"),
       ),
       Divider(),
+      this.isLogin
+          ? Container(
+              height: ScreenAdapter.height(100),
+              child: CustomizeButton(
+                callback: () {
+                  UserServices.loginOut();
+                  _getUserInfo();
+                },
+                text: '退出登录',
+                bgColor: Colors.red,
+              ),
+            )
+          : Text('')
     ];
     return list;
   }

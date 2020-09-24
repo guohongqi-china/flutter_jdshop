@@ -4,6 +4,7 @@ class CustomizeButton extends StatelessWidget {
   Color bgColor;
   String text;
   Function callback;
+  double height;
   var margin;
 
   CustomizeButton(
@@ -11,6 +12,7 @@ class CustomizeButton extends StatelessWidget {
       this.bgColor = Colors.black,
       this.text = "按钮",
       this.margin,
+      this.height,
       @required this.callback})
       : super(key: key);
 
@@ -19,6 +21,7 @@ class CustomizeButton extends StatelessWidget {
     return InkWell(
       onTap: this.callback,
       child: Container(
+        height: this.height,
         margin: this.margin ?? EdgeInsets.fromLTRB(10, 10, 10, 10),
         alignment: Alignment.center,
         child: Text(this.text,
